@@ -150,7 +150,7 @@ end;
 class function TMessaging.RegisterAnonymousSubscriber<T>(
         aProc: TSubscribeMethod<T>): TObject;
 begin
-  DefaultChannel.RegisterAnonymousSubscriber<T>(aProc);
+  Result := DefaultChannel.RegisterAnonymousSubscriber<T>(aProc);
 end;
 
 class procedure TMessaging.RegisterSubscriber(

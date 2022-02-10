@@ -87,7 +87,7 @@ type
     /// <summary>
     ///
     /// </summary>
-    destructor Destroy;
+    destructor Destroy; override;
     /// <summary>
     ///
     /// </summary>
@@ -220,15 +220,25 @@ begin
   fLock := TCriticalSection.Create;
   fCache := TDictionary<TObject, TMethodCacheList>.Create;
   fSubscriberList := TList<TObject>.Create;
-  fAnonymousSubscriberList := TObjectList<TObject>.Create;
+  fAnonymousSubscriberList := TList<TObject>.Create;
 end;
 
 destructor TMessageChannel.Destroy;
+var
+  lSubscriber: TObject;
 begin
   ClearCacheList;
   fLock.Free;
   fCache.Free;
   fSubscriberList.Free;
+  // If anonymous list is not empty, free all the remain subscribers
+  while FAnonymousSubscriberList.Count > 0 do
+  begin
+    lSubscriber := FAnonymousSubscriberList[0];
+    fAnonymousSubscriberList.Delete(0);
+    lSubscriber.Free;
+  end;
+  // Free the anonymous list
   fAnonymousSubscriberList.Free;
 end;
 
