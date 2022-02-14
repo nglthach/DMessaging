@@ -1,3 +1,25 @@
+﻿//  MIT License
+//
+//  Copyright © 2021 Ngô Thạch (https://www.smartmonkey.app)
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in all
+//  copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  SOFTWARE.
+
 unit DMessaging;
 
 interface
@@ -10,14 +32,14 @@ uses
 type
   TMessaging = record
   private
-    class var DefaultChannel: TMessageChannel;
+    class var CommonChannel: TMessageChannel;
   public
     class constructor Create;
     class destructor Destroy;
     /// <summary>
     ///
     /// </summary>
-    class function CreateChannel: TMessageChannel; static;
+    class function CreatePrivateChannel: TMessageChannel; static;
     /// <summary>
     ///
     /// </summary>
@@ -48,9 +70,9 @@ type
     ///
     /// </summary>
     class procedure Send(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>); overload; static;
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>); overload; static;
     /// <summary>
     ///
     /// </summary>
@@ -61,9 +83,9 @@ type
     ///
     /// </summary>
     class procedure SendThenFree(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>); overload; static;
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>); overload; static;
     /// <summary>
     ///
     /// </summary>
@@ -74,9 +96,9 @@ type
     ///
     /// </summary>
     class procedure SendInMainThread(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>); overload; static;
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>); overload; static;
     /// <summary>
     ///
     /// </summary>
@@ -87,9 +109,9 @@ type
     ///
     /// </summary>
     class procedure SendInMainThreadThenFree(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>); overload; static;
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>); overload; static;
     /// <summary>
     ///
     /// </summary>
@@ -100,9 +122,9 @@ type
     ///
     /// </summary>
     class procedure SendInMainThreadSync(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>); overload; static;
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>); overload; static;
     /// <summary>
     ///
     /// </summary>
@@ -113,9 +135,9 @@ type
     ///
     /// </summary>
     class procedure SendInMainThreadThenFreeSync(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>); overload; static;
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>); overload; static;
   end;
   /// <summary>
   ///
@@ -124,8 +146,17 @@ type
   private
     fValue: T;
   public
-    constructor Create(AValue: T);
-    property Value: T read fValue;
+    /// <summary>
+    ///
+    /// </summary>
+    constructor Create(
+        aValue: T);
+    /// <summary>
+    ///
+    /// </summary>
+    property Value: T
+        read  fValue
+        write fValue;
   end;
 
 implementation
@@ -134,15 +165,15 @@ implementation
 
 class constructor TMessaging.Create;
 begin
-  DefaultChannel := TMessageChannel.Create;
+  CommonChannel := TMessageChannel.Create;
 end;
 
 class destructor TMessaging.Destroy;
 begin
-  DefaultChannel.Free;
+  CommonChannel.Free;
 end;
 
-class function TMessaging.CreateChannel: TMessageChannel;
+class function TMessaging.CreatePrivateChannel: TMessageChannel;
 begin
   Result := TMessageChannel.Create;
 end;
@@ -150,122 +181,123 @@ end;
 class function TMessaging.RegisterAnonymousSubscriber<T>(
         aProc: TSubscribeMethod<T>): TObject;
 begin
-  Result := DefaultChannel.RegisterAnonymousSubscriber<T>(aProc);
+  Result := CommonChannel.RegisterAnonymousSubscriber<T>(aProc);
 end;
 
 class procedure TMessaging.RegisterSubscriber(
         aSubscriber: TObject);
 begin
-  DefaultChannel.RegisterSubscriber(aSubscriber);
+  CommonChannel.RegisterSubscriber(aSubscriber);
 end;
 
 class procedure TMessaging.UnregisterSubscriber(
         aSubscriber: TObject);
 begin
-  DefaultChannel.UnregisterSubscriber(aSubscriber);
+  CommonChannel.UnregisterSubscriber(aSubscriber);
 end;
 
 class procedure TMessaging.FreeSubscriber(
         aSubscriber: TObject);
 begin
-  DefaultChannel.FreeSubscriber(aSubscriber);
+  CommonChannel.FreeSubscriber(aSubscriber);
 end;
 
 class procedure TMessaging.Send(
         const aMessageID: string;
         const aData     : TObject);
 begin
-  DefaultChannel.Send(aMessageID, aData);
+  CommonChannel.Send(aMessageID, aData);
 end;
 
 class procedure TMessaging.Send(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>);
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>);
 begin
-  DefaultChannel.Send(aMessageID, aData, aExcludeSubscribers);
+  CommonChannel.Send(aMessageID, aData, aExceptedSubscribers);
 end;
 
 class procedure TMessaging.SendThenFree(
         const aMessageID: string;
         const aData     : TObject);
 begin
-  DefaultChannel.SendThenFree(aMessageID, aData);
+  CommonChannel.SendThenFree(aMessageID, aData);
 end;
 
 class procedure TMessaging.SendThenFree(
-        const aMessageID             : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>);
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>);
 begin
-  DefaultChannel.SendThenFree(aMessageID, aData, aExcludeSubscribers);;
+  CommonChannel.SendThenFree(aMessageID, aData, aExceptedSubscribers);;
 end;
 
 class procedure TMessaging.SendInMainThread(
         const aMessageID: string;
         const aData     : TObject);
 begin
-  DefaultChannel.SendInMainThread(aMessageID, aData);
+  CommonChannel.SendInMainThread(aMessageID, aData);
 end;
 
 class procedure TMessaging.SendInMainThread(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>);
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>);
 begin
-  DefaultChannel.SendInMainThread(aMessageID, aData, aExcludeSubscribers);
+  CommonChannel.SendInMainThread(aMessageID, aData, aExceptedSubscribers);
 end;
 
 class procedure TMessaging.SendInMainThreadThenFree(
         const aMessageID: string;
         const aData     : TObject);
 begin
-  DefaultChannel.SendInMainThreadThenFree(aMessageID, aData);
+  CommonChannel.SendInMainThreadThenFree(aMessageID, aData);
 end;
 
 class procedure TMessaging.SendInMainThreadThenFree(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>);
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>);
 begin
-  DefaultChannel.SendInMainThreadThenFree(aMessageID, aData, aExcludeSubscribers);
+  CommonChannel.SendInMainThreadThenFree(aMessageID, aData, aExceptedSubscribers);
 end;
 
 class procedure TMessaging.SendInMainThreadSync(
         const aMessageID: string;
         const aData     : TObject);
 begin
-  DefaultChannel.SendInMainThreadSync(aMessageID, aData);
+  CommonChannel.SendInMainThreadSync(aMessageID, aData);
 end;
 
 class procedure TMessaging.SendInMainThreadSync(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>);
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>);
 begin
-  DefaultChannel.SendInMainThreadSync(aMessageID, aData, aExcludeSubscribers);
+  CommonChannel.SendInMainThreadSync(aMessageID, aData, aExceptedSubscribers);
 end;
 
 class procedure TMessaging.SendInMainThreadThenFreeSync(
         const aMessageID: string;
         const aData     : TObject);
 begin
-  DefaultChannel.SendInMainThreadThenFreeSync(aMessageID, aData);
+  CommonChannel.SendInMainThreadThenFreeSync(aMessageID, aData);
 end;
 
 class procedure TMessaging.SendInMainThreadThenFreeSync(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>);
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>);
 begin
-  DefaultChannel.SendInMainThreadThenFreeSync(aMessageID, aData, aExcludeSubscribers);
+  CommonChannel.SendInMainThreadThenFreeSync(aMessageID, aData, aExceptedSubscribers);
 end;
 
 { TValueWrapper<T> }
 
-constructor TValueWrapper<T>.Create(AValue: T);
+constructor TValueWrapper<T>.Create(
+        aValue: T);
 begin
-  fValue := AValue;
+  fValue := aValue;
 end;
 
 end.
