@@ -128,11 +128,21 @@ type
     /// <summary>
     ///
     /// </summary>
+    procedure UnregisterSubscribers(
+        aSubscribers: TArray<TObject>);
+    /// <summary>
+    ///
+    /// </summary>
     procedure FreeSubscriber(
         aSubscriber: TObject);
     /// <summary>
     ///
     /// </summary>
+    procedure FreeSubscribers(
+        aSubscribers: TArray<TObject>);
+    /// <summary>
+    ///
+    /// </summary>
     procedure Send(
         const aMessageID: string;
         const aData     : TObject); overload;
@@ -140,9 +150,9 @@ type
     ///
     /// </summary>
     procedure Send(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>); overload;
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>); overload;
     /// <summary>
     ///
     /// </summary>
@@ -153,9 +163,9 @@ type
     ///
     /// </summary>
     procedure SendThenFree(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>); overload;
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>); overload;
     /// <summary>
     ///
     /// </summary>
@@ -166,9 +176,9 @@ type
     ///
     /// </summary>
     procedure SendInMainThread(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>); overload;
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>); overload;
     /// <summary>
     ///
     /// </summary>
@@ -179,9 +189,9 @@ type
     ///
     /// </summary>
     procedure SendInMainThreadThenFree(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>); overload;
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>); overload;
     /// <summary>
     ///
     /// </summary>
@@ -192,9 +202,9 @@ type
     ///
     /// </summary>
     procedure SendInMainThreadSync(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>); overload;
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>); overload;
     /// <summary>
     ///
     /// </summary>
@@ -205,9 +215,9 @@ type
     ///
     /// </summary>
     procedure SendInMainThreadThenFreeSync(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>); overload;
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>); overload;
   end;
 
 implementation
@@ -326,16 +336,16 @@ begin
 end;
 
 procedure TMessageChannel.Send(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>);
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>);
 var
   lSubscriber: TObject;
 begin
   fLock.Acquire;
   try
     for lSubscriber in fSubscriberList do
-      if not InArray(lSubscriber, aExcludeSubscribers) then
+      if not InArray(lSubscriber, aExceptedSubscribers) then
         Send(aMessageID, aData, lSubscriber);
   finally
     fLock.Release;
@@ -343,11 +353,11 @@ begin
 end;
 
 procedure TMessageChannel.SendThenFree(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>);
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>);
 begin
-  Send(aMessageID, aData, aExcludeSubscribers);
+  Send(aMessageID, aData, aExceptedSubscribers);
   aData.Free;
 end;
 
@@ -404,14 +414,14 @@ begin
 end;
 
 procedure TMessageChannel.SendInMainThread(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>);
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>);
 begin
   TThread.ForceQueue(nil,
     procedure
     begin
-      Send(aMessageID, aData, aExcludeSubscribers);
+      Send(aMessageID, aData, aExceptedSubscribers);
     end
   );
 end;
@@ -429,14 +439,14 @@ begin
 end;
 
 procedure TMessageChannel.SendInMainThreadThenFree(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>);
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>);
 begin
   TThread.ForceQueue(nil,
     procedure
     begin
-      SendThenFree(aMessageID, aData, aExcludeSubscribers);
+      SendThenFree(aMessageID, aData, aExceptedSubscribers);
     end
   );
 end;
@@ -454,14 +464,14 @@ begin
 end;
 
 procedure TMessageChannel.SendInMainThreadSync(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>);
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>);
 begin
   TThread.Synchronize(nil,
     procedure
     begin
-      Send(aMessageID, aData, aExcludeSubscribers);
+      Send(aMessageID, aData, aExceptedSubscribers);
     end
   );
 end;
@@ -479,14 +489,14 @@ begin
 end;
 
 procedure TMessageChannel.SendInMainThreadThenFreeSync(
-        const aMessageID         : string;
-        const aData              : TObject;
-        const aExcludeSubscribers: TArray<TObject>);
+        const aMessageID          : string;
+        const aData               : TObject;
+        const aExceptedSubscribers: TArray<TObject>);
 begin
   TThread.Synchronize(nil,
     procedure
     begin
-      SendThenFree(aMessageID, aData, aExcludeSubscribers);
+      SendThenFree(aMessageID, aData, aExceptedSubscribers);
     end
   );
 end;
@@ -512,6 +522,15 @@ begin
   end;
 end;
 
+procedure TMessageChannel.UnregisterSubscribers(
+        aSubscribers: TArray<TObject>);
+var
+  lSubscriber: TObject;
+begin
+  for lSubscriber in aSubscribers do
+    UnregisterSubscriber(lSubscriber);
+end;
+
 procedure TMessageChannel.FreeSubscriber(
         aSubscriber: TObject);
 begin
@@ -519,13 +538,20 @@ begin
   aSubscriber.Free;
 end;
 
+procedure TMessageChannel.FreeSubscribers(
+        aSubscribers: TArray<TObject>);
+var
+  lSubscriber: TObject;
+begin
+  for lSubscriber in aSubscribers do
+    FreeSubscriber(lSubscriber);
+end;
+
 { TMessageChannel.TAnonymousSubscriber<T> }
 
 procedure TMessageChannel.TAnonymousSubscriber<T>.BeforeDestruction;
 begin
-  if fChannel.fAnonymousSubscriberList.Contains(Self) then
-    fChannel.fAnonymousSubscriberList.Remove(Self);
-
+  fChannel.UnregisterSubscriber(Self);
   inherited;
 end;
 
