@@ -93,10 +93,6 @@ type
     /// <summary>
     ///
     /// </summary>
-    procedure ClearCacheList;
-    /// <summary>
-    ///
-    /// </summary>
     procedure Send(
         const aMessageID : string;
         const aData      : TObject;
@@ -236,42 +232,24 @@ end;
 
 { TMessageChannel }
 
-procedure TMessageChannel.ClearCacheList;
-var
-  lKey: TObject;
-begin
-  for lKey in fCache.Keys.ToArray do
-  begin
-    fCache.Items[lKey].Free;
-    fCache.Remove(lKey);
-  end;
-end;
-
 constructor TMessageChannel.Create;
 begin
   fLock := TCriticalSection.Create;
-  fCache := TDictionary<TObject, TMethodCacheList>.Create;
+  fCache :=   TObjectDictionary<TObject, TMethodCacheList>.Create([doOwnsValues]);
   fSubscriberList := TList<TObject>.Create;
   fAnonymousSubscriberList := TList<TObject>.Create;
 end;
 
 destructor TMessageChannel.Destroy;
-var
-  lSubscriber: TObject;
 begin
-  ClearCacheList;
+  // If anonymous list is not empty, free all the remain subscribers
+  while FAnonymousSubscriberList.Count > 0 do
+    FAnonymousSubscriberList[0].Free;
+  // Free the anonymous list
+  fAnonymousSubscriberList.Free;
   fLock.Free;
   fCache.Free;
   fSubscriberList.Free;
-  // If anonymous list is not empty, free all the remain subscribers
-  while FAnonymousSubscriberList.Count > 0 do
-  begin
-    lSubscriber := FAnonymousSubscriberList[0];
-    fAnonymousSubscriberList.Delete(0);
-    lSubscriber.Free;
-  end;
-  // Free the anonymous list
-  fAnonymousSubscriberList.Free;
 end;
 
 function TMessageChannel.GetSubscribeMethodList(
@@ -503,15 +481,11 @@ end;
 
 procedure TMessageChannel.UnregisterSubscriber(
         aSubscriber: TObject);
-var
-  lCacheList: TMethodCacheList;
 begin
   fLock.Acquire;
   try
     if fSubscriberList.Contains(aSubscriber) then
     begin
-      lCacheList := fCache.Items[aSubscriber];
-      lCacheList.Free;
       fCache.Remove(aSubscriber);
       fSubscriberList.Remove(aSubscriber);
     end;
