@@ -86,58 +86,6 @@ type
         const aMessageID          : string;
         const aData               : TObject;
         const aExceptedSubscribers: TArray<TObject>); overload; static;
-    /// <summary>
-    ///
-    /// </summary>
-    class procedure SendInMainThread(
-        const aMessageID: string;
-        const aData     : TObject); overload; static;
-    /// <summary>
-    ///
-    /// </summary>
-    class procedure SendInMainThread(
-        const aMessageID          : string;
-        const aData               : TObject;
-        const aExceptedSubscribers: TArray<TObject>); overload; static;
-    /// <summary>
-    ///
-    /// </summary>
-    class procedure SendInMainThreadThenFree(
-        const aMessageID: string;
-        const aData     : TObject); overload; static;
-    /// <summary>
-    ///
-    /// </summary>
-    class procedure SendInMainThreadThenFree(
-        const aMessageID          : string;
-        const aData               : TObject;
-        const aExceptedSubscribers: TArray<TObject>); overload; static;
-    /// <summary>
-    ///
-    /// </summary>
-    class procedure SendInMainThreadSync(
-        const aMessageID: string;
-        const aData     : TObject); overload; static;
-    /// <summary>
-    ///
-    /// </summary>
-    class procedure SendInMainThreadSync(
-        const aMessageID          : string;
-        const aData               : TObject;
-        const aExceptedSubscribers: TArray<TObject>); overload; static;
-    /// <summary>
-    ///
-    /// </summary>
-    class procedure SendInMainThreadThenFreeSync(
-        const aMessageID: string;
-        const aData     : TObject); overload; static;
-    /// <summary>
-    ///
-    /// </summary>
-    class procedure SendInMainThreadThenFreeSync(
-        const aMessageID          : string;
-        const aData               : TObject;
-        const aExceptedSubscribers: TArray<TObject>); overload; static;
   end;
   /// <summary>
   ///
@@ -230,66 +178,6 @@ class procedure TMessaging.SendThenFree(
         const aExceptedSubscribers: TArray<TObject>);
 begin
   CommonChannel.SendThenFree(aMessageID, aData, aExceptedSubscribers);;
-end;
-
-class procedure TMessaging.SendInMainThread(
-        const aMessageID: string;
-        const aData     : TObject);
-begin
-  CommonChannel.SendInMainThread(aMessageID, aData);
-end;
-
-class procedure TMessaging.SendInMainThread(
-        const aMessageID          : string;
-        const aData               : TObject;
-        const aExceptedSubscribers: TArray<TObject>);
-begin
-  CommonChannel.SendInMainThread(aMessageID, aData, aExceptedSubscribers);
-end;
-
-class procedure TMessaging.SendInMainThreadThenFree(
-        const aMessageID: string;
-        const aData     : TObject);
-begin
-  CommonChannel.SendInMainThreadThenFree(aMessageID, aData);
-end;
-
-class procedure TMessaging.SendInMainThreadThenFree(
-        const aMessageID          : string;
-        const aData               : TObject;
-        const aExceptedSubscribers: TArray<TObject>);
-begin
-  CommonChannel.SendInMainThreadThenFree(aMessageID, aData, aExceptedSubscribers);
-end;
-
-class procedure TMessaging.SendInMainThreadSync(
-        const aMessageID: string;
-        const aData     : TObject);
-begin
-  CommonChannel.SendInMainThreadSync(aMessageID, aData);
-end;
-
-class procedure TMessaging.SendInMainThreadSync(
-        const aMessageID          : string;
-        const aData               : TObject;
-        const aExceptedSubscribers: TArray<TObject>);
-begin
-  CommonChannel.SendInMainThreadSync(aMessageID, aData, aExceptedSubscribers);
-end;
-
-class procedure TMessaging.SendInMainThreadThenFreeSync(
-        const aMessageID: string;
-        const aData     : TObject);
-begin
-  CommonChannel.SendInMainThreadThenFreeSync(aMessageID, aData);
-end;
-
-class procedure TMessaging.SendInMainThreadThenFreeSync(
-        const aMessageID          : string;
-        const aData               : TObject;
-        const aExceptedSubscribers: TArray<TObject>);
-begin
-  CommonChannel.SendInMainThreadThenFreeSync(aMessageID, aData, aExceptedSubscribers);
 end;
 
 { TValueWrapper<T> }

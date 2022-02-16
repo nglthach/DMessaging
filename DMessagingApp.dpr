@@ -8,7 +8,8 @@ uses
   System.SysUtils,
   DMessaging in 'Src\DMessaging.pas',
   DMessaging.Channel in 'Src\DMessaging.Channel.pas',
-  DMessaging.Tuples in 'Src\DMessaging.Tuples.pas';
+  DMessaging.Tuples in 'Src\DMessaging.Tuples.pas',
+  DMessaging.UIHelper in 'Src\DMessaging.UIHelper.pas';
 
 const
   MSG_NEW_USER = 'NewUser';
