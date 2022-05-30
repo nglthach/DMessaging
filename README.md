@@ -13,26 +13,29 @@ program DMessagingApp;
 uses
   System.SysUtils,
   DMessaging in 'Src\DMessaging.pas',
-  DMessaging.Channel in 'Src\DMessaging.Channel.pas',
-  DMessaging.Tuples in 'Src\DMessaging.Tuples.pas',
-  DMessaging.UIHelper in 'Src\DMessaging.UIHelper.pas';
+  DMessaging.Channel in 'Src\DMessaging.Channel.pas';
 
 const
   MSG_NEW_USER = 'NewUser';
+  
+ type
+   TUser = class
+     Firstname, Lastname: string;
+   end;
 
 begin
   try
-    TMessaging.RegisterAnonymousSubscriber<TTuple<string, string>>(
-        procedure (const MessageID: string; Arg: TTuple<string, string>)
+    TMessaging.RegisterAnonymousSubscriber<TUser>(
+        procedure (const MessageID: string; Arg: TUser)
           begin
             if MessageID = MSG_NEW_USER then
-              Writeln('New user: ', Arg.Value1, ' ', Arg.Value2);
+              Writeln('New user: ', Arg.Firstname, ' ', Arg.Lastname);
           end
     );
 
     TMessaging.SendThenFree(
         MSG_NEW_USER,
-        TTuple<string, string>.Create('Foo', 'Bar')
+        TUser.Create('Foo', 'Bar')
     );
   except
     on E: Exception do
@@ -40,6 +43,7 @@ begin
   end;
   ReadLn;
 end.
+
 ```
 
 Output:
