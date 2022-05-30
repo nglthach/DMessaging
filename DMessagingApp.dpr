@@ -15,7 +15,15 @@ const
  type
    TUser = class
      Firstname, Lastname: string;
+   public
+     constructor Create(const aFirstname, aLastname: string);
    end;
+   
+constructor TUser.Create(const aFirstname, aLastname: string);
+begin
+  Firstname := aFirstname;
+  Lastname := aLastname;
+end;
 
 begin
   try
