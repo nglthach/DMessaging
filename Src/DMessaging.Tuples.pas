@@ -25,7 +25,14 @@ type
   /// <summary>
   ///
   /// </summary>
-  TTupleOwnerships = set of (toOwnsAll, toOwnsValue1, toOwnsValue2, toOwnsValue3, toOwnsValue4);
+  TTupleOwnerships = set of (
+      toOwnsAll,
+      toOwnsValue1,
+      toOwnsValue2,
+      toOwnsValue3,
+      toOwnsValue4,
+      toOwnsValue5
+  );
   /// <summary>
   ///
   /// </summary>
@@ -56,20 +63,54 @@ type
   /// <summary>
   ///
   /// </summary>
+  ITuple<T1, T2, T3, T4, T5> = interface(ITuple<T1, T2, T3, T4>)
+    procedure SetValue5(Value : T5);
+    function GetValue5 : T5;
+    property Value5 : T5 read GetValue5 write SetValue5;
+  end;
+  /// <summary>
+  ///
+  /// </summary>
   TTuple<T1, T2> = class(TInterfacedObject, ITuple<T1, T2>)
   protected
     FOwnerships: TTupleOwnerships;
     FValue1 : T1;
     FValue2 : T2;
+    /// <summary>
+    ///
+    /// </summary>
     procedure SetValue1(Value : T1);
+    /// <summary>
+    ///
+    /// </summary>
     function GetValue1 : T1;
+    /// <summary>
+    ///
+    /// </summary>
     procedure SetValue2(Value : T2);
+    /// <summary>
+    ///
+    /// </summary>
     function GetValue2 : T2;
   public
+    /// <summary>
+    ///
+    /// </summary>
     constructor Create(Value1 : T1; Value2 : T2; Ownerships: TTupleOwnerships = []); virtual;
+    /// <summary>
+    ///
+    /// </summary>
     destructor Destroy; override;
+    /// <summary>
+    ///
+    /// </summary>
     property Value1 : T1 read FValue1 write FValue1;
-    property Value2 : T2 read FValue2 write FValue2;
+    /// <summary>
+    ///
+    /// </summary>
+    property Value2 : T2
+        read  FValue2
+        write FValue2;
   end;
   /// <summary>
   ///
@@ -77,12 +118,29 @@ type
   TTuple<T1, T2, T3> = class(TTuple<T1, T2>, ITuple<T1, T2, T3>)
   protected
     FValue3 : T3;
+    /// <summary>
+    ///
+    /// </summary>
     procedure SetValue3(Value : T3);
+    /// <summary>
+    ///
+    /// </summary>
     function GetValue3 : T3;
   public
+    /// <summary>
+    ///
+    /// </summary>
     constructor Create(Value1 : T1; Value2 : T2; Value3 : T3; Ownerships: TTupleOwnerships = []); reintroduce;
+    /// <summary>
+    ///
+    /// </summary>
     destructor Destroy; override;
-    property Value3 : T3 read GetValue3 write SetValue3;
+    /// <summary>
+    ///
+    /// </summary>
+    property Value3 : T3
+        read  GetValue3
+        write SetValue3;
   end;
   /// <summary>
   ///
@@ -90,12 +148,61 @@ type
   TTuple<T1, T2, T3, T4> = class(TTuple<T1, T2, T3>, ITuple<T1, T2, T3, T4>)
   protected
     FValue4 : T4;
+    /// <summary>
+    ///
+    /// </summary>
     procedure SetValue4(Value : T4);
+    /// <summary>
+    ///
+    /// </summary>
     function GetValue4 : T4;
   public
+    /// <summary>
+    ///
+    /// </summary>
     constructor Create(Value1 : T1; Value2 : T2; Value3 : T3; Value4: T4; Ownerships: TTupleOwnerships = []); reintroduce;
+    /// <summary>
+    ///
+    /// </summary>
     destructor Destroy; override;
-    property Value4 : T4 read GetValue4 write SetValue4;
+    /// <summary>
+    ///
+    /// </summary>
+    property Value4 : T4
+        read  GetValue4
+        write SetValue4;
+  end;
+  /// <summary>
+  ///
+  /// </summary>
+  TTuple<T1, T2, T3, T4, T5> = class(TTuple<T1, T2, T3, T4>, ITuple<T1, T2, T3, T4, T5>)
+  protected
+    FValue5 : T5;
+    /// <summary>
+    ///
+    /// </summary>
+    procedure SetValue5(Value : T5);
+    /// <summary>
+    ///
+    /// </summary>
+    function GetValue5 : T5;
+  public
+    /// <summary>
+    ///
+    /// </summary>
+    constructor Create(
+        Value1 : T1; Value2 : T2; Value3 : T3; Value4: T4; Value5: T5;
+        Ownerships: TTupleOwnerships = []); reintroduce;
+    /// <summary>
+    ///
+    /// </summary>
+    destructor Destroy; override;
+    /// <summary>
+    ///
+    /// </summary>
+    property Value5 : T5
+        read  GetValue5
+        write SetValue5;
   end;
 
 implementation
@@ -212,6 +319,38 @@ end;
 procedure TTuple<T1, T2, T3, T4>.SetValue4(Value: T4);
 begin
   FValue4 := Value;
+end;
+
+{ TTuple<T1, T2, T3, T4, T5> }
+
+constructor TTuple<T1, T2, T3, T4, T5>.Create(Value1: T1; Value2: T2; Value3: T3; Value4: T4; Value5: T5; Ownerships: TTupleOwnerships);
+begin
+  inherited Create(Value1, Value2, Value3, Value4, Ownerships);
+  Self.Value5 := Value5;
+end;
+
+destructor TTuple<T1, T2, T3, T4, T5>.Destroy;
+{$IFNDEF AUTOREFCOUNT}
+var
+  LValue5Holder : TValue;
+{$ENDIF}
+begin
+{$IFNDEF AUTOREFCOUNT}
+  LValue5Holder := TValue.From<T4>(FValue4);
+  if ((toOwnsAll in FOwnerships) or (toOwnsValue5 in FOwnerships)) and LValue5Holder.IsObject then
+    LValue5Holder.AsObject.Free;
+{$ENDIF}
+  inherited;
+end;
+
+function TTuple<T1, T2, T3, T4, T5>.GetValue5: T5;
+begin
+  Result := FValue5;
+end;
+
+procedure TTuple<T1, T2, T3, T4, T5>.SetValue5(Value: T5);
+begin
+  FValue5 := Value;
 end;
 
 end.
